@@ -1,0 +1,24 @@
+# Camera parameter
+camera:
+    # sensor size in mm
+    sensor_width: 7.2
+    sensor_height: 5.4
+    # resolution in pixel
+    resolution_horizontal: 1600
+    resolution_vertical: 1200
+    # pixel size in μm
+    pixel_size_horizontal: 4.5
+    pixel_size_vertical: 4.5
+# Lens parameter
+lens:
+    # focal length in mm
+    focal_length: 4
+# Stereo Setup Parameter
+stereo:
+    # baseline distance in meter
+    baseline: 0.5
+# Stereo setup visualization
+visualization:
+    camera: true
+    plane: true
+    volume: true
