@@ -6,13 +6,12 @@ import yaml
 
 class Stereo:
     
-    
     def __init__(self, path):
         self.__clearScene()
-        self.__setupScene()
         self.__readStereoConfigurationFile(path)
+        self.__setupScene()
         return
-
+test
     # Removes all objects. material and textures from the Blender scene
     def __clearScene(self):
         # Remove all materials
@@ -47,7 +46,10 @@ class Stereo:
         light.data.use_shadow = False
         light.data.energy = 5.0
         light.select_set(False)
+        
         self.scene = bpy.context.scene
+        self.scene.render.resolution_x = self.config["camera"]["resolution_horizontal"]
+        self.scene.render.resolution_y = self.config["camera"]["resolution_vertical"]
         self.scene.render.use_multiview = True
         self.scene.render.views_format = 'STEREO_3D'
         return
@@ -73,6 +75,8 @@ class Stereo:
         
         # Set the camera parameter loaded from the configuration file
         camera.data.stereo.convergence_distance = 10000
+        camera.data.sensor_height  = self.config["camera"]["sensor_height"]
+        camera.data.sensor_width= self.config["camera"]["sensor_width"]
         camera.data.lens = self.config["lens"]["focal_length"]
         camera.data.stereo.interocular_distance = self.config["stereo"]["baseline"]
         # Move camera in the scene
@@ -81,6 +85,7 @@ class Stereo:
         camera.location = (0,0,1)
         print('Stereo setup created')
         self.printStereoConfiguration()
+        
 
     # prints the configuration of the created stereo system
     def printStereoConfiguration(self):
@@ -109,6 +114,9 @@ class Stereo:
     # Creates an artificial stereo dataset with corresponding ground truth data
     def createStereoDataset(self,scenes):
         for ii in range(0,scenes):
+            
+            self.__clearScene()
+            self.createStereoSetup()
             # Adds objects randomly in the cameras field of viw
             self.__addObjectsToScene()
             #setup the depthmap calculation using blender's mist function:
@@ -157,6 +165,6 @@ class Stereo:
 
 
 # Provide full path to the configuration file
-stereo = Stereo("/home/lenovo/Desktop/stereoBlender/stereo.yaml")
+stereo = Stereo("/home/lenovo/Desktop/StereoBlender/stereo.yaml")
 stereo.createStereoSetup()
 #stereo.createStereoDataset(10)
