@@ -17,8 +17,18 @@ lens:
 stereo:
     # baseline distance in meter
     baseline: 0.5
+    accuracy: pixel
+# 
+dataset:
+    # Whether to create a dataset or not
+    generation: true
+    # path where the created images are stored
+    path:
+    # Nuber of images to be created
+    size: 10
 # Stereo setup visualization
 visualization:
     camera: true
     plane: true
     volume: true
+    alpha: 0.3

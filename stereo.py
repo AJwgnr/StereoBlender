@@ -11,7 +11,7 @@ class Stereo:
         self.__readStereoConfigurationFile(path)
         self.__setupScene()
         return
-test
+    
     # Removes all objects. material and textures from the Blender scene
     def __clearScene(self):
         # Remove all materials
@@ -47,6 +47,7 @@ test
         light.data.energy = 5.0
         light.select_set(False)
         
+        # Set the resolution of the camera/scene
         self.scene = bpy.context.scene
         self.scene.render.resolution_x = self.config["camera"]["resolution_horizontal"]
         self.scene.render.resolution_y = self.config["camera"]["resolution_vertical"]
@@ -59,7 +60,7 @@ test
         with open(path, 'r') as stream:
             try:
                 self.config = yaml.load(stream)
-                print(self.config)
+                #print(self.config)
             except yaml.YAMLError as exc:
                 print(exc)
         return 
@@ -84,7 +85,24 @@ test
         camera.rotation_euler = (1.5708, 0, 0)
         camera.location = (0,0,1)
         print('Stereo setup created')
+        
+        areas = bpy.context.screen.areas
+
+        # Change stereoscopic parameter to visualizing both cameras and the corresponding frustums
+        for area in areas:
+            if (area.type == "VIEW_3D"):
+                area.spaces[0].show_stereo_3d_cameras           = self.config["visualization"]["camera"]
+                area.spaces[0].show_stereo_3d_convergence_plane = self.config["visualization"]["plane"]
+                area.spaces[0].show_stereo_3d_volume            = self.config["visualization"]["volume"]
+                area.spaces[0].stereo_3d_volume_alpha           = self.config["visualization"]["alpha"]
+     
+        # Turning the created camera into the active camera for this scene
+        currentCameraObj = bpy.data.objects[bpy.context.active_object.name]
+        self.scene.camera = currentCameraObj   
+        
         self.printStereoConfiguration()
+        
+ 
         
 
     # prints the configuration of the created stereo system
@@ -93,17 +111,17 @@ test
         #print('Field of View Vertical: ' + str(self.config["camera"]["focal_length"])) 
         #print('Field of View Horizontal: ' + str(self.config["camera"]["focal_length"]))
         
-        print('Sensor Resolution Horizontal: '+ str(self.config["camera"]["resolution_horizontal"]))
-        print('Sensor Resolution Vertical: '+ str(self.config["camera"]["resolution_vertical"]))
-        print('Pixel Size Horizontal: '+ str(self.config["camera"]["pixel_size_horizontal"]))
-        print('Pixel Size Vertical: '+ str(self.config["camera"]["pixel_size_vertical"]))
+        print('Sensor Resolution Horizontal (px):  '+ str(self.config["camera"]["resolution_horizontal"]))
+        print('Sensor Resolution Vertical (px): '+ str(self.config["camera"]["resolution_vertical"]))
+        print('Pixel Size Horizontal (μm): '+ str(self.config["camera"]["pixel_size_horizontal"]))
+        print('Pixel Size Vertical (μm): '+ str(self.config["camera"]["pixel_size_vertical"]))
         
         print(str("\n")+ "Lens settings: ")
-        print('Focal Length: ' + str(self.config["lens"]["focal_length"])) 
+        print('Focal Length (mm): ' + str(self.config["lens"]["focal_length"])) 
         
         print(str("\n") + "Stereo settings: ")
-        print('Baseline: ' + str(self.config["stereo"]["baseline"])) 
-        print('Intersection FOV (Minimum Depth): '+ str()) 
+        print('Baseline (m): ' + str(self.config["stereo"]["baseline"])) 
+        print('Intersection FOV/Minimum Depth (m): '+ str()) 
         print('Estimated Depth Error: ' + str()) 
         return
 
@@ -112,37 +130,39 @@ test
 
 
     # Creates an artificial stereo dataset with corresponding ground truth data
-    def createStereoDataset(self,scenes):
-        for ii in range(0,scenes):
-            
-            self.__clearScene()
-            self.createStereoSetup()
-            # Adds objects randomly in the cameras field of viw
-            self.__addObjectsToScene()
-            #setup the depthmap calculation using blender's mist function:
-            self.scene.render.layers['RenderLayer'].use_pass_mist = True
-            self.scene.world.mist_settings.falloff = 'LINEAR'
-            self.scene.world.mist_settings.intensity = 0.0
-            self.scene.world.mist_settings.depth = dist
-            print(dist)
-            
-            # ouput the depthmap:
-            links.new(rl.outputs['Mist'],composite.inputs['Image'])
-            self.scene.render.use_multiview = False
+    def createStereoDataset(self):
+        if(self.config["dataset"]["generation"] == True):
+            for count in range(0,self.config["dataset"]["size"]):
 
-            self.scene.render.filepath = 'Depth_map/DepthMap_'+str(ii)+'.png'
-            bpy.ops.render.render( write_still=True ) 
-            # output the stereoscopic images:
-            links.new(rl.outputs['Image'],composite.inputs['Image'])
-            self.scene.render.use_multiview = True
-            self.scene.render.filepath = 'StereoImages/Stereoscopic_'+str(ii)+'.png'
-            bpy.ops.render.render( write_still=True ) 
+                self.__clearScene()
+                self.createStereoSetup()
+                # Adds objects randomly in the cameras field of viw
+                self.__addObjectsToScene()
+                #setup the depthmap calculation using blender's mist function:
+                self.scene.view_layer.use_pass_mist = True
+                self.scene.world.mist_settings.falloff = 'LINEAR'
+                self.scene.world.mist_settings.intensity = 0.0
+                self.scene.world.mist_settings.depth = dist
+                print(dist)
+
+                # ouput the depthmap:
+                links.new(rl.outputs['Mist'],composite.inputs['Image'])
+                self.scene.render.use_multiview = False
+
+                self.scene.render.filepath = 'Depth_map/DepthMap_'+str(count)+'.png'
+                bpy.ops.render.render( write_still=True ) 
+                # output the stereoscopic images:
+                links.new(rl.outputs['Image'],composite.inputs['Image'])
+                self.scene.render.use_multiview = True
+                self.scene.render.filepath = 'StereoImages/Stereoscopic_'+str(count)+'.png'
+                bpy.ops.render.render( write_still=True ) 
         return
 
 
 
     # Adds a set of objects randomly to the scene
     def __addObjectsToScene(self):
+        self.magn = 10
         self.__createCube('Cube','Material')
         self.__createCube('Cube.001','Material.001')
         self.__createCone('Cone','Material.002')
@@ -152,19 +172,21 @@ test
 
     # Creates a Cube with a CubeName and a material
     def __createCube(self, CubeName, MatName):
-        bpy.ops.mesh.primitive_cube_add(location=((0.3-rand.random())*magn, (0.3-rand.random())*magn, (0.3-rand.random())*magn))
+        bpy.ops.mesh.primitive_cube_add(location=((0.3-rand.random())*self.magn, (0.3-rand.random())*self.magn, (0.3-rand.random())*self.magn))
     # Creates a Cone with a CubeName and a material
     def __createCone(self,ConeName, MatName):
-        bpy.ops.mesh.primitive_cone_add(location=((0.5-rand.random())*magn, (0.4-rand.random())*magn, (0.6-rand.random())*magn))
+        bpy.ops.mesh.primitive_cone_add(location=((0.5-rand.random())*self.magn, (0.4-rand.random())*self.magn, (0.6-rand.random())*self.magn))
     # Creates a Torus with a CubeName and a material
     def __createTorus(self, TorusName, MatName):
-        bpy.ops.mesh.primitive_torus_add(location=((0.35-rand.random())*magn, (0.55-rand.random())*magn, (0.45-rand.random())*magn))
+        bpy.ops.mesh.primitive_torus_add(location=((0.35-rand.random())*self.magn, (0.55-rand.random())*self.magn, (0.45-rand.random())*self.magn))
     # Creates a Sphere with a CubeName and a material
     def __createSphere(self,SphereName, MatName):
-        bpy.ops.mesh.primitive_uv_sphere_add(location=((0.5-rand.random())*magn, (0.5-rand.random())*magn, (0.5-rand.random())*magn))
+        bpy.ops.mesh.primitive_uv_sphere_add(location=((0.5-rand.random())*self.magn, (0.5-rand.random())*self.magn, (0.5-rand.random())*self.magn))
 
 
 # Provide full path to the configuration file
 stereo = Stereo("/home/lenovo/Desktop/StereoBlender/stereo.yaml")
 stereo.createStereoSetup()
-#stereo.createStereoDataset(10)
+#stereo.createStereoDataset()
+
+
