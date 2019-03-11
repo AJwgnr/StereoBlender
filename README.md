@@ -1,3 +1,8 @@
+# TODO
+- Fix lighting for rendering images (rendering in general)
+- Fix positioning of objects in scene
+
+
 # StereoBlender
 
 
@@ -12,7 +17,11 @@ Part of my master thesis for visualizing a stereo setup and how the change of th
 
 ## Configuration
 
+Before starting you have to configure **2 Paths**:
+- `stereo.py`: Full path of the configuration file
+- `stereo.yaml`: Full path where the dataset should be stored
+
 The configuration of the stereo setup can be done using the YAML configuration file `stereo.yaml`.
 
-
+# References
 The basic idea and also some code snippets of this repository are taken from https://github.com/LouisFoucard/DepthMap_dataset.
