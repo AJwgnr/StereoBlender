@@ -12,23 +12,28 @@ camera:
 # Lens parameter
 lens:
     # focal length in mm
-    focal_length: 4
+    focal_length: 10
 # Stereo Setup Parameter
 stereo:
     # baseline distance in meter
     baseline: 0.5
+    # Accuracy of the planned stereo algorithm
     accuracy: pixel
-# 
+# Dataset creation parameter
 dataset:
     # Whether to create a dataset or not
     generation: true
-    # path where the created images are stored
-    path:
+    # Path where the created images are stored
+    path: /home/lenovo/Desktop/StereoBlender/Dataset/
     # Nuber of images to be created
-    size: 10
+    size: 5
 # Stereo setup visualization
 visualization:
+    # Show both cameras in the scene
     camera: true
+    # Show the stereo convergence plane
     plane: true
+    # Show the cameras frustums (visualizes the field of views of the camera)
     volume: true
+    # Color of the created volume
     alpha: 0.3
