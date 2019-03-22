@@ -26,7 +26,7 @@ dataset:
     # Path where the created images are stored
     path: /home/lenovo/Desktop/StereoBlender/Dataset/
     # Nuber of images to be created
-    size: 5
+    size: 1
 # Stereo setup visualization
 visualization:
     # Show both cameras in the scene

@@ -194,16 +194,16 @@ class Stereo:
 
     # Creates a Cube with a CubeName and a material
     def __createCube(self, CubeName, MatName):
-        bpy.ops.mesh.primitive_cube_add(location=((0.3-rand.random())*self.magn, (0.3+rand.random())*self.magn, (0.3+rand.random())*self.magn))
+        bpy.ops.mesh.primitive_cube_add(location=((0.3-rand.random())*self.magn, (10+rand.random())*self.magn, (0.3+rand.random())*self.magn))
     # Creates a Cone with a CubeName and a material
     def __createCone(self,ConeName, MatName):
-        bpy.ops.mesh.primitive_cone_add(location=((0.5-rand.random())*self.magn, (0.4+rand.random())*self.magn, (0.6+rand.random())*self.magn))
+        bpy.ops.mesh.primitive_cone_add(location=((0.5-rand.random())*self.magn, (10+rand.random())*self.magn, (0.6+rand.random())*self.magn))
     # Creates a Torus with a CubeName and a material
     def __createTorus(self, TorusName, MatName):
-        bpy.ops.mesh.primitive_torus_add(location=((0.35-rand.random())*self.magn, (0.55+rand.random())*self.magn, (0.45+rand.random())*self.magn))
+        bpy.ops.mesh.primitive_torus_add(location=((0.35-rand.random())*self.magn, (10+rand.random())*self.magn, (0.45+rand.random())*self.magn))
     # Creates a Sphere with a CubeName and a material
     def __createSphere(self,SphereName, MatName):
-        bpy.ops.mesh.primitive_uv_sphere_add(location=((0.5-rand.random())*self.magn, (0.5+rand.random())*self.magn, (0.5+rand.random())*self.magn))
+        bpy.ops.mesh.primitive_uv_sphere_add(location=((0.5-rand.random())*self.magn, (10+rand.random())*self.magn, (0.5+rand.random())*self.magn))
 
 
 # Provide full path to the configuration file
